@@ -1,0 +1,72 @@
+{
+    "Wolf": {
+    "movement": 1,
+    "meele": 2,
+    "ranged": 0,
+    "blast": 0,
+    "health": 2,
+    "armor": 1,
+    "courage": 2,
+    "image": "Card_images/Tyranids/Wolf.jpg"
+    },
+    "Hormagaunt": {
+    "movement": 1,
+    "meele": 3,
+    "ranged": 0,
+    "blast": 0,
+    "health": 3,
+    "armor": 1,
+    "courage": 5,
+    "image": "Card_images/Tyranids/Hormagaunt.png"
+    },
+    "space_marine": {
+    "movement": 1,
+    "meele": 1,
+    "ranged": 5,
+    "blast": 2,
+    "health": 5,
+    "armor": 2,
+    "courage": 3,
+    "image": "Card_images/Space_marines/space_marine.jpg"
+    },
+    "assault_marine": {
+    "movement": 1,
+    "meele": 5,
+    "ranged": 1,
+    "blast": 0,
+    "health": 5,
+    "armor": 2,
+    "courage": 3,
+    "image": "Card_images/Space_marines/assault_marine.jpg"
+    },
+    "dreadnought": {
+    "movement": 1,
+    "meele": 0,
+    "ranged": 2,
+    "blast": 4,
+    "health": 4,
+    "armor": 4,
+    "courage": 3,
+    "image": "Card_images/Space_marines/dreadnought.jfif"
+    },
+    "space_marine_tank": {
+    "movement": 1,
+    "meele": 3,
+    "ranged": 8,
+    "blast": 2,
+    "health": 6,
+    "armor": 6,
+    "courage": 4,
+    "image": "Card_images/Space_marines/space_marine_tank.png"
+    },
+    "gulliman": {
+    "movement": 1,
+    "meele": 7,
+    "ranged": 7,
+    "blast": 5,
+    "health": 7,
+    "armor": 5,
+    "courage": 10,
+    "image": "Card_images/Space_marines/gulliman.jfif"
+    }
+}

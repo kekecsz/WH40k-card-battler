@@ -1,0 +1,17 @@
+{
+    "space_marine": {
+    "count": 3
+    }, 
+    "assault_marine": {
+    "count": 3
+    },
+    "dreadnought": {
+    "count": 3
+    },
+    "space_marine_tank": {
+    "count": 1
+    },
+    "gulliman": {
+    "count": 1
+    }
+}

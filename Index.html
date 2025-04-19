@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Card Battler Game</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        background: #f0f0f0;
+        margin: 0;
+        padding: 20px;
+      }
+    
+      /* Main container with horizontal layout */
+      #game-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 10px;
+        width: 100%;
+        max-width: 1600px;
+        margin: 0 auto;
+        box-sizing: border-box;
+      }
+  
+      .game-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+  
+      #left-panel, #right-panel {
+        width: 35%;
+        background-color: #e0e0e0;
+        padding: 10px;
+        border-radius: 8px;
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+  
+      #center-panel {
+        width: 30%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-sizing: border-box;
+      }
+  
+      .player-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        margin-bottom: 10px;
+      }
+  
+      .player-controls button {
+        padding: 8px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+  
+      .player-controls button:hover {
+        background-color: #45a049;
+      }
+  
+      .upgrade-deck {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        grid-template-rows: repeat(3, 80px);
+        gap: 3px;
+        margin-top: 10px;
+        background-color: #f5f5f5;
+        padding: 5px;
+        border-radius: 5px;
+      }
+  
+      .card-info {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: white;
+        font-size: 12px;
+        text-align: center;
+        padding: 2px 0;
+        border-bottom-left-radius: 6px;
+        border-bottom-right-radius: 6px;
+        pointer-events: none;
+      }
+  
+      .card img.card-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 6px;
+        pointer-events: none;
+      }
+  
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        grid-template-rows: repeat(5, 110px);
+        gap: 3px;
+        width: 100%;
+      }
+  
+      .tile {
+        background-color: #ddd;
+        border: 2px solid #aaa;
+        position: relative;
+        cursor: pointer;
+        aspect-ratio: 3/4;
+      }
+  
+      .tile.selected {
+        border: 2px solid #ff9800;
+      }
+  
+      .card {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        box-sizing: border-box;
+        overflow: hidden;
+        background-color: #4caf50;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-weight: bold;
+        font-size: 85px;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+        border-radius: 6px;
+        position: relative;
+      }
+  
+      .hand > .card {
+        grid-column: auto;
+      }
+
+      .card.selected {
+        outline: 3px solid #ff9800;
+      }
+  
+      .hand {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 3px;
+        height: 115px;
+        position: relative;
+      }
+  
+      #player-hand-top {
+        background-color: #ffdddd;
+        border: 2px solid red;
+      }
+  
+      #player-hand-bottom {
+        background-color: #ddeeff;
+        border: 2px solid blue;
+      }
+  
+      .panel-title {
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #333;
+      }
+  
+      @media (min-width: 1200px) {
+        #game-container {
+          max-width: 2000px;
+        }
+      }
+  
+      @media (max-width: 1200px) {
+        #game-container {
+          flex-direction: column;
+        }
+        #left-panel, #center-panel, #right-panel {
+          width: 100%;
+        }
+      }
+
+      /* Player ownership styling */
+      .player1-card {
+        border: 2px solid #0066cc;
+        box-shadow: 0 0 5px rgba(0, 102, 204, 0.5);
+      }
+
+      .player2-card {
+        border: 2px solid #cc0000;
+        box-shadow: 0 0 5px rgba(204, 0, 0, 0.5);
+      }
+
+      .owner-indicator {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: white;
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-size: 10px;
+        font-weight: bold;
+        z-index: 2;
+      }
+
+      .player1-card .owner-indicator {
+        background-color: rgba(0, 102, 204, 0.8);
+      }
+
+      .player2-card .owner-indicator {
+        background-color: rgba(204, 0, 0, 0.8);
+      }
+
+      #attack-menu {
+        background-color: white;
+        border: 2px solid black;
+        border-radius: 8px;
+        padding: 5px;
+        box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+      }
+
+      .attack-btn {
+        font-size: 24px;
+        margin: 2px;
+        cursor: pointer;
+        background: none;
+        border: none;
+      }
+      .attack-btn:hover {
+        background-color: lightgray;
+        border-radius: 4px;
+      }
+
+      .damage-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 0, 0, 0.4);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s;
+        z-index: 1;
+        border-radius: inherit;
+      }
+
+      .card.damage-animation {
+        animation: damageFlash 1s ease;
+      }
+
+      @keyframes damageFlash {
+        0% {
+          background-color: rgba(255, 0, 0, 0.4);
+          transform: rotate(0deg);
+        }
+        20% {
+          transform: rotate(-3deg);
+        }
+        40% {
+          transform: rotate(3deg);
+        }
+        60% {
+          transform: rotate(-2deg);
+        }
+        80% {
+          transform: rotate(2deg);
+        }
+        100% {
+          background-color: transparent;
+          transform: rotate(0deg);
+        }
+      }
+
+      .card.damage-animation .damage-overlay {
+        opacity: 1;
+        animation: damageFade 1s ease forwards;
+      }
+
+      @keyframes damageFade {
+        0% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+
+      /* Graveyard Styles */
+      .graveyard {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        padding: 10px;
+        background-color: #444;
+        border-radius: 5px;
+        min-height: 60px;
+        margin-top: 5px;
+      }
+
+      .graveyard-item {
+        width: 40px;
+        height: 60px;
+        background-color: #666;
+        border-radius: 4px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .graveyard-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .graveyard-item::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1;
+      }
+
+      .graveyard-info {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        font-size: 8px;
+        text-align: center;
+        z-index: 2;
+      }
+
+      .death-animation {
+        animation: deathAnimation 2s forwards; /* Increased to 2s */
+        position: relative;
+        overflow: visible !important;
+      }
+
+      @keyframes deathAnimation {
+        0% {
+          opacity: 1;
+          transform: scale(1) rotate(0deg);
+          filter: brightness(1.5) contrast(1.2);
+        }
+        20% {
+          transform: scale(1.2) rotate(-5deg);
+          filter: brightness(2) contrast(1.5);
+        }
+        40% {
+          transform: scale(0.9) rotate(10deg);
+          filter: brightness(1.8) sepia(0.6);
+        }
+        60% {
+          transform: scale(0.8) rotate(-15deg) translate(10px, -5px);
+          filter: brightness(1.5) sepia(0.8);
+          opacity: 0.8;
+        }
+        80% {
+          transform: scale(0.5) rotate(20deg) translate(-15px, 10px);
+          opacity: 0.4;
+        }
+        100% {
+          transform: scale(0) rotate(30deg) translate(0, 30px);
+          opacity: 0;
+        }
+      }
+
+      /* Adding this effect to simulate card breaking */
+      .death-animation::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: linear-gradient(45deg, rgba(0,0,0,0) 45%, rgba(255,0,0,0.8) 50%, rgba(0,0,0,0) 55%),
+                          linear-gradient(135deg, rgba(0,0,0,0) 45%, rgba(255,0,0,0.8) 50%, rgba(0,0,0,0) 55%);
+        background-size: 200% 200%;
+        animation: crack 0.5s forwards;
+        z-index: 10;
+        pointer-events: none;
+      }
+
+      @keyframes crack {
+        0% {
+          background-position: 200% 200%;
+          opacity: 0;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          background-position: 100% 100%;
+          opacity: 0.8;
+        }
+      }
+    </style>
+  </head>
+
+<body>
+  <div id="game-container">
+    <!-- Left Panel - Player 1 -->
+    <div id="left-panel" class="game-panel">
+      <div class="panel-title">Player 1</div>
+      <div id="player-hand-bottom" class="hand"></div>
+      
+      <div class="player-controls">
+        <button onclick="shuffleDeck('player_1_deck')">Shuffle Player 1 Deck</button>
+        <button onclick="drawFromDeck('player_1', 'player_1_deck')">Draw for Player 1</button>
+      </div>
+      
+      <div class="panel-title">Upgrade Deck - Player 1</div>
+      <div id="player1-upgrade-deck" class="upgrade-deck"></div>
+      
+      <div class="panel-title">Graveyard - Player 1</div>
+      <div id="player1-graveyard" class="graveyard"></div>
+    </div>
+    
+    <!-- Center Panel - Game Board -->
+    <div id="center-panel" class="game-panel">
+      <div id="game-board" class="grid"></div>
+    </div>
+    
+    <!-- Right Panel - Player 2 -->
+    <div id="right-panel" class="game-panel">
+      <div class="panel-title">Player 2</div>
+      <div id="player-hand-top" class="hand"></div>
+      
+      <div class="player-controls">
+        <button onclick="shuffleDeck('player_2_deck')">Shuffle Player 2 Deck</button>
+        <button onclick="drawFromDeck('player_2', 'player_2_deck')">Draw for Player 2</button>
+      </div>
+      
+      <div class="panel-title">Upgrade Deck - Player 2</div>
+      <div id="player2-upgrade-deck" class="upgrade-deck"></div>
+      
+      <div class="panel-title">Graveyard - Player 2</div>
+      <div id="player2-graveyard" class="graveyard"></div>
+    </div>
+  </div>
+
+  <div id="damage-controls" style="margin-top: 1rem;">
+    <input type="text" id="damage-target-id" placeholder="Enter entity ID" />
+    <button id="damage-button">Damage +1</button>
+  </div>
+  
+  <div id="attack-menu" style="display: none; position: absolute; z-index: 1000;">
+    <button class="attack-btn" data-type="meele">⚔️</button>
+    <button class="attack-btn" data-type="ranged">🏹</button>
+    <button class="attack-btn" data-type="blast">💥</button>
+  </div>
+
+  <script>
+    const gridSize = 5;
+    const cardData = {};
+    const entitiesOnGrid = {};
+    const decks = {};
+    let selectedCard = null;
+  
+    const grid = document.getElementById("game-board");
+    const playerHandTop = document.getElementById("player-hand-top");
+    const playerHandBottom = document.getElementById("player-hand-bottom");
+    const player1UpgradeDeck = document.getElementById("player1-upgrade-deck");
+    const player2UpgradeDeck = document.getElementById("player2-upgrade-deck");
+    const player1Graveyard = document.getElementById("player1-graveyard");
+    const player2Graveyard = document.getElementById("player2-graveyard");
+  
+    // Track cards in each player's hand and graveyard
+    const player1Hand = [];
+    const player2Hand = [];
+    const graveyard_player_1 = [];
+    const graveyard_player_2 = [];
+    
+    let cardIdCounter = 1;
+
+    function generateCardId() {
+      const padded = String(cardIdCounter).padStart(5, '0');
+      const id = `id_${padded}`;
+      cardIdCounter++;
+      return id;
+    }
+
+    // Create board tiles
+    function createGridTiles(container, columns, rows) {
+      container.innerHTML = "";
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < columns; x++) {
+          const tile = document.createElement("div");
+          tile.className = "tile";
+          tile.dataset.x = x;
+          tile.dataset.y = y;
+          container.appendChild(tile);
+  
+          tile.addEventListener("click", () => {
+            if (selectedCard) {
+              const entityId = selectedCard.dataset.entityId;
+              const entity = entitiesOnGrid[entityId];
+              if (!entity) return;
+              
+              const fromHand = entity.container === playerHandTop || entity.container === playerHandBottom;
+              
+              if (fromHand) {
+                // Store the original position
+                const oldX = entity.position.x;
+                const oldY = entity.position.y;
+                
+                // Determine which hand this card is coming from
+                let playerHand;
+                if (entity.container === playerHandTop) {
+                  playerHand = player2Hand;
+                  entity.owner = 2;
+                } else {
+                  playerHand = player1Hand;
+                  entity.owner = 1;
+                }
+                
+                // Remove card from hand array
+                const index = playerHand.findIndex(card => card.id === entity.id);
+                if (index !== -1) {
+                  playerHand.splice(index, 1);
+                }
+                
+                // Update entity position & container
+                entity.position = { x: parseInt(tile.dataset.x), y: parseInt(tile.dataset.y) };
+                entity.container = grid;
+                
+                // Remove card from the hand DOM
+                if (entity.container === playerHandTop) {
+                  playerHandTop.children[oldY * 7 + oldX].innerHTML = "";
+                } else {
+                  playerHandBottom.children[oldY * 7 + oldX].innerHTML = "";
+                }
+                
+                // Place on the board
+                tile.appendChild(selectedCard);
+                
+                // Re-render hand to close gaps
+                if (entity.container === playerHandTop) {
+                  renderHand(player2Hand, playerHandTop);
+                } else {
+                  renderHand(player1Hand, playerHandBottom);
+                }
+              } else {
+                // Moving on the grid
+                const dx = Math.abs(entity.position.x - parseInt(tile.dataset.x));
+                const dy = Math.abs(entity.position.y - parseInt(tile.dataset.y));
+                const distance = Math.max(dx, dy); // Chebyshev distance allows diagonals
+                
+                if (distance <= entity.movement) {
+                  moveEntityTo(entity, parseInt(tile.dataset.x), parseInt(tile.dataset.y));
+                } else {
+                  console.warn("Move too far for movement stat.");
+                  // Optionally: flash tile red or show message
+                }
+              }
+  
+              selectedCard.classList.remove("selected");
+              selectedCard = null;
+            }
+          });
+
+          tile.addEventListener("contextmenu", (e) => {
+            e.preventDefault(); // prevent browser context menu
+
+            if (selectedCard) {
+              const attackerId = selectedCard.dataset.entityId;
+              const targetCard = tile.querySelector(".card");
+
+              if (!targetCard) {
+                console.warn("No target on this tile.");
+                return;
+              }
+
+              const targetId = targetCard.dataset.entityId;
+              console.log(`Attacking from ${attackerId} to ${targetId}`);
+
+              handleAttack(attackerId, targetId);
+            }
+          });
+        }
+      }
+    }
+  
+    function renderHand(handArray, container) {
+      // Clear all tiles in the hand container
+      for (let i = 0; i < container.children.length; i++) {
+        container.children[i].innerHTML = "";
+      }
+      
+      // Place cards according to the handArray
+      handArray.forEach((entity, index) => {
+        const x = index % 7; // Column position in hand
+        const y = 0;         // Always row 0 for hands
+        
+        // Update entity position to reflect new layout
+        entity.position = { x, y };
+        
+        // Create visual card element
+        const card = createCardElement(entity);
+        
+        // Place card in correct tile
+        container.children[y * 7 + x].appendChild(card);
+      });
+    }
+    
+    function renderGraveyard(graveyardArray, container) {
+      container.innerHTML = "";
+      
+      graveyardArray.forEach(entity => {
+        const item = document.createElement("div");
+        item.className = "graveyard-item";
+        
+        if (cardData[entity.name]?.image) {
+          const img = document.createElement("img");
+          img.src = cardData[entity.name].image;
+          img.alt = entity.name;
+          item.appendChild(img);
+        }
+        
+        const info = document.createElement("div");
+        info.className = "graveyard-info";
+        info.innerText = entity.name;
+        item.appendChild(info);
+        
+        // Add tooltip with complete card info
+        item.title = `${entity.name}: 🏃${entity.movement} ⚔️${entity.meele} 🏹${entity.ranged} 💥${entity.blast} 🛡️${entity.armor} ❤️${entity.health} 🧠${entity.courage}`;
+        
+        container.appendChild(item);
+      });
+    }
+
+    function createCardElement(entity) {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.dataset.entityId = entity.id;
+      
+      // Add owner-specific styling
+      const ownerClass = entity.owner === 1 ? "player1-card" : "player2-card";
+      card.classList.add(ownerClass);
+      
+      if (cardData[entity.name]?.image) {
+        const img = document.createElement("img");
+        img.src = cardData[entity.name].image;
+        img.alt = entity.name;
+        img.className = "card-img";
+        card.appendChild(img);
+      }
+      
+      const overlay = document.createElement("div");
+      overlay.className = "damage-overlay";
+      card.appendChild(overlay);
+      
+      // Add owner indicator
+      const ownerIndicator = document.createElement("div");
+      ownerIndicator.className = "owner-indicator";
+      ownerIndicator.innerText = entity.owner === 1 ? "P1" : "P2";
+      card.appendChild(ownerIndicator);
+      
+      const info = document.createElement("div");
+      info.className = "card-info";
+      info.innerText = ` 🏃${entity.movement} ⚔️${entity.meele} 🏹${entity.ranged} 💥${entity.blast} 🛡️${entity.armor} ❤️${entity.health} 🧠${entity.courage}`;
+      card.appendChild(info);
+      
+      card.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (selectedCard) {
+          selectedCard.classList.remove("selected");
+          if (selectedCard === card) {
+            selectedCard = null;
+            return;
+          }
+        }
+        selectedCard = card;
+        card.classList.add("selected");
+      });
+
+      card.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        showAttackMenu(e.pageX, e.pageY, card.dataset.entityId);
+      });
+      
+      return card;
+    }
+
+    createGridTiles(grid, gridSize, gridSize);
+    createGridTiles(playerHandTop, 7, 1);
+    createGridTiles(playerHandBottom, 7, 1);
+    createGridTiles(player1UpgradeDeck, 7, 3);
+    createGridTiles(player2UpgradeDeck, 7, 3);
+  
+    function createEntity(cardName, x, y, container, ownerId) {
+      const cardInfo = cardData[cardName] || {
+        movement: 1, meele: 1, ranged: 0, blast: 0, 
+        health: 5, armor: 1, courage: 3,
+        image: "placeholder.jpg"
+      };
+
+      const entityId = generateCardId();
+      const entity = {
+        id: entityId,
+        name: cardName,
+        movement: cardInfo.movement,
+        meele: cardInfo.meele,
+        ranged: cardInfo.ranged,
+        blast: cardInfo.blast,
+        health: cardInfo.health,
+        armor: cardInfo.armor,
+        courage: cardInfo.courage,
+        position: { x, y },
+        container,
+        owner: ownerId
+      };
+      
+      entitiesOnGrid[entityId] = entity;
+      
+      // If going to hand, add to player hand array
+      if (container === playerHandTop) {
+        player2Hand.push(entity);
+        renderHand(player2Hand, playerHandTop);
+      } else if (container === playerHandBottom) {
+        player1Hand.push(entity);
+        renderHand(player1Hand, playerHandBottom);
+      } else {
+        // For grid and upgrade decks, just place it directly
+        const columns = container === grid ? gridSize : 7;
+        const tileIndex = y * columns + x;
+        if (container.children[tileIndex]) {
+          const card = createCardElement(entity);
+          container.children[tileIndex].appendChild(card);
+        }
+      }
+    }
+  
+    function showAttackMenu(x, y, targetId) {
+      if (!selectedCard) return; // Don't open menu if no attacker selected
+
+      const attackerId = selectedCard.dataset.entityId;
+      const attacker = entitiesOnGrid[attackerId];
+      const target = entitiesOnGrid[targetId];
+
+      // Check if target belongs to the same player
+      if (attacker.owner === target.owner) {
+        console.warn("Cannot attack your own cards!");
+        return; // Don't show attack menu for friendly targets
+      }
+
+      const menu = document.getElementById("attack-menu");
+      menu.style.left = `${x}px`;
+      menu.style.top = `${y}px`;
+      menu.style.display = "block";
+
+      // Remove old listeners
+      const newMenu = menu.cloneNode(true);
+      menu.parentNode.replaceChild(newMenu, menu);
+
+      newMenu.querySelectorAll(".attack-btn").forEach(btn => {
+        const type = btn.dataset.type;
+        const attackPower = attacker?.[type] ?? 0;
+        let disabled = attackPower <= 0;
+
+        const dx = Math.abs(attacker.position.x - target.position.x);
+        const dy = Math.abs(attacker.position.y - target.position.y);
+        const distance = Math.max(dx, dy);
+
+        const ranges = {
+          meele: { min: 1, max: 1 },
+          ranged: { min: 1, max: 2 },
+          blast: { min: 2, max: 3 }
+        };
+
+        const { min, max } = ranges[type] || { min: 0, max: 0 };
+
+        // Check if attack is in allowed range
+        if (distance < min || distance > max) {
+          disabled = true;
+          btn.title = `${type} attack out of range (${min}-${max})`;
+        }
+
+        // Special rule for blast: only vertical allowed
+        if (type === "blast" && attacker.position.x !== target.position.x) {
+          disabled = true;
+          btn.title = "Blast attack must be vertical";
+        }
+
+        // Fallback title if none set
+        if (!btn.title && disabled) {
+          btn.title = "No attack value in this type";
+        }
+
+        btn.disabled = disabled;
+        btn.style.opacity = disabled ? 0.4 : 1;
+
+        btn.addEventListener("click", () => {
+          handleAttack(attackerId, targetId, type);
+          selectedCard.classList.remove("selected");
+          selectedCard = null;
+          newMenu.style.display = "none";
+        });
+      });
+
+      document.addEventListener("click", () => {
+        newMenu.style.display = "none";
+      }, { once: true });
+    }
+
+    function moveEntityTo(entity, newX, newY) {
+      const oldX = entity.position.x;
+      const oldY = entity.position.y;
+      const oldIndex = oldY * gridSize + oldX;
+      const oldTile = grid.children[oldIndex];
+      const newIndex = newY * gridSize + newX;
+      const newTile = grid.children[newIndex];
+
+      const card = oldTile.querySelector(`.card[data-entity-id='${entity.id}']`);
+      if (card) {
+        oldTile.removeChild(card);
+        newTile.appendChild(card);
+
+        // Update position, but keep ID the same
+        entity.position = { x: newX, y: newY };
+      }
+    }
+  
+    function handleAttack(attackerId, targetId, type = "meele") {
+      const attacker = entitiesOnGrid[attackerId];
+      const target = entitiesOnGrid[targetId];
+
+      if (!attacker || !target || attackerId === targetId) {
+        console.warn("Invalid attacker or target.");
+        return;
+      }
+
+      // Check if target belongs to the same player
+      if (attacker.owner === target.owner) {
+        console.warn("Cannot attack your own cards!");
+        return;
+      }
+
+      const dx = Math.abs(attacker.position.x - target.position.x);
+      const dy = Math.abs(attacker.position.y - target.position.y);
+      const distance = Math.max(dx, dy); // allow diagonal
+
+      if (type === "blast") {
+        // Only allow blast on vertical axis (same x)
+        if (attacker.position.x !== target.position.x) {
+          console.warn("Blast attack must be vertical.");
+          return;
+        }
+      }
+
+      const ranges = {
+        meele: { min: 0, max: 1 },
+        ranged: { min: 1, max: 5 },
+        blast: { min: 2, max: 5 }
+      };
+
+      const { min, max } = ranges[type] || { min: 0, max: 0 };
+
+      if (distance < min || distance > max) {
+        console.warn(`${type} attack out of range. Distance: ${distance}, allowed: ${min}-${max}`);
+        return;
+      }
+      
+      // Get the attack value from the attacker for the attack type
+      const attackValue = attacker[type] ?? 0;
+      if (attackValue <= 0) {
+        console.warn("No attack value for selected type.");
+        return;
+      }
+
+
+
+      const rawDamage = type === "blast" ? attackValue : attackValue - target.armor;
+      const actualDamage = Math.max(0, rawDamage);
+      updateEntityProperty("health", targetId, -actualDamage);
+    }
+
+    function drawFromDeck(playerId, deckId) {
+      const deck = decks[deckId];
+      if (!deck || deck.length === 0) {
+        console.warn("Deck is empty!");
+        return;
+      }
+
+      // Play card draw sound
+      playSound("draw");
+      
+      const cardName = deck.shift();
+      const ownerId = playerId === "player_1" ? 1 : 2;
+      const container = playerId === "player_1" ? playerHandBottom : playerHandTop;
+      
+      // Get next available position
+      const playerHand = playerId === "player_1" ? player1Hand : player2Hand;
+      const x = playerHand.length % 7;
+      const y = 0;
+      
+      createEntity(cardName, x, y, container, ownerId);
+    }
+
+    async function getPlayerDeck(playerId, jsonFile) {
+      try {
+        const response = await fetch(jsonFile);
+        const data = await response.json();
+        const deck = [];
+        for (let cardName in data) {
+          const count = data[cardName].count || 1;
+          for (let i = 0; i < count; i++) {
+            deck.push(cardName);
+          }
+        }
+        decks[playerId] = deck;
+      } catch (error) {
+        console.error("Error loading deck:", error);
+        // Create a default deck if loading fails
+        decks[playerId] = ["Default Card", "Default Card", "Default Card"];
+      }
+    }
+  
+    function shuffleDeck(deckId) {
+      const deck = decks[deckId];
+      if (!deck || deck.length === 0) return;
+      
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+    }
+  
+    function drawFromDeck(playerId, deckId) {
+      const deck = decks[deckId];
+      if (!deck || deck.length === 0) {
+        console.warn("Deck is empty!");
+        return;
+      }
+  
+      const cardName = deck.shift();
+      const ownerId = playerId === "player_1" ? 1 : 2;
+      const container = playerId === "player_1" ? playerHandBottom : playerHandTop;
+      
+      // Get next available position
+      const playerHand = playerId === "player_1" ? player1Hand : player2Hand;
+      const x = playerHand.length % 7;
+      const y = 0;
+      
+      createEntity(cardName, x, y, container, ownerId);
+    }
+  
+    function sendToGraveyard(entityId) {
+      const entity = entitiesOnGrid[entityId];
+      if (!entity) return;
+      
+      // Play death sound
+      playSound("death");
+      
+      // Get the card element
+      const cardElement = document.querySelector(`.card[data-entity-id="${entityId}"]`);
+      if (!cardElement) return;
+      
+      // First remove any existing damage animation
+      cardElement.classList.remove("damage-animation");
+      
+      // Add a dramatic glow effect before death
+      cardElement.style.boxShadow = "0 0 20px 10px rgba(255, 0, 0, 0.7)";
+      cardElement.style.zIndex = "100"; // Bring to front
+      
+      // Wait a moment for the glow to be visible
+      setTimeout(() => {
+        // Create a death animation
+        cardElement.classList.add("death-animation");
+        
+        // Wait for animation to complete before removing
+        setTimeout(() => {
+          // Find the parent tile and remove the card
+          const parentTile = cardElement.parentElement;
+          if (parentTile) {
+            parentTile.removeChild(cardElement);
+          }
+          
+          // Add card to appropriate graveyard
+          const playerGraveyard = entity.owner === 1 ? graveyard_player_1 : graveyard_player_2;
+          playerGraveyard.push({...entity}); // Add a copy to graveyard
+          
+          // Update graveyard display
+          if (entity.owner === 1) {
+            renderGraveyard(graveyard_player_1, player1Graveyard);
+          } else {
+            renderGraveyard(graveyard_player_2, player2Graveyard);
+          }
+          
+          // Remove from entities object
+          delete entitiesOnGrid[entityId];
+          
+          console.log(`Card ${entity.name} (${entityId}) sent to Player ${entity.owner} graveyard`);
+        }, 2000); // Increased animation duration
+      }, 300); // Short delay for the glow effect
+    }
+  
+    async function initializeGame() {
+      try {
+        const cardDataResponse = await fetch("cards.json");
+        Object.assign(cardData, await cardDataResponse.json());
+      } catch (error) {
+        console.warn("Could not load card data, using defaults");
+        // Create some default cards
+        cardData["Default Card"] = {
+          movement: 1, meele: 1, ranged: 0, blast: 0, 
+          health: 5, armor: 1, courage: 3
+        };
+      }
+      
+      await getPlayerDeck("player_1_deck", "Player_1_deck.json");
+      await getPlayerDeck("player_2_deck", "Player_2_deck.json");
+      
+      // Shuffle initial decks
+      shuffleDeck("player_1_deck");
+      shuffleDeck("player_2_deck");
+      
+      // Load sounds
+      loadSounds();
+    }
+  
+    initializeGame();
+
+    function updateEntityProperty(propertyName, entityId, delta) {
+      const entity = entitiesOnGrid[entityId];
+      if (!entity || typeof entity[propertyName] !== 'number') {
+        console.warn("Invalid entity or property:", entityId, propertyName);
+        return;
+      }
+
+      entity[propertyName] += delta;
+
+      // Clamp to 0 if needed (optional)
+      if (entity[propertyName] < 0) {
+        entity[propertyName] = 0;
+      }
+
+      // Update the display
+      const card = document.querySelector(`.card[data-entity-id="${entityId}"]`);
+      if (card) {
+        const info = card.querySelector(".card-info");
+        if (info) {
+          info.innerText = ` 🏃${entity.movement} ⚔️${entity.meele} 🏹${entity.ranged} 💥${entity.blast} 🛡️${entity.armor} ❤️${entity.health} 🧠${entity.courage}`;
+        }
+
+        // Play damage sound if health is decreasing
+        if (propertyName === "health" && delta < 0) {
+          playSound("damage");
+        }
+
+        // Trigger damage animation
+        card.classList.add("damage-animation");
+        setTimeout(() => {
+          card.classList.remove("damage-animation");
+        }, 1000); // Matches animation duration
+        
+        // Check if health is zero and send to graveyard if needed
+        if (propertyName === "health" && entity.health <= 0) {
+          console.log(`Entity ${entityId} health is zero, sending to graveyard`);
+          sendToGraveyard(entityId);
+        }
+      }
+    }
+
+    document.getElementById("damage-button").addEventListener("click", () => {
+      const id = document.getElementById("damage-target-id").value.trim();
+      if (id) {
+        updateEntityProperty("health", id, -1);
+      }
+    });
+
+    // Sound system
+    const sounds = {
+      damage: null,
+      death: null,
+      attack: null,
+      draw: null
+    };
+
+    // Preload sounds
+    function loadSounds() {
+      // Create audio objects
+      sounds.damage = new Audio("Sounds/damage.mp3");
+      sounds.death = new Audio("Sounds/death.mp3");
+      sounds.draw = new Audio("Sounds/draw.mp3");
+      
+      // Optional: Set volume for all sounds
+      Object.values(sounds).forEach(sound => {
+        if (sound) sound.volume = 0.6;
+      });
+    }
+
+    // Play a sound with optional volume override
+    // Function to safely try to play sounds with fallback
+    function playSound(soundName, volume = null) {
+      const sound = sounds[soundName];
+      if (!sound) return;
+      
+      // Clone the audio to allow overlapping sounds
+      const soundClone = sound.cloneNode();
+      if (volume !== null) soundClone.volume = volume;
+      
+      // Add error handling
+      const playPromise = soundClone.play();
+      
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.log("Sound play error:", error);
+          // You could implement a fallback here, like using a different audio API
+        });
+      }
+    }
+  </script>
+</body>
+</html>
