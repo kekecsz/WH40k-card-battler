@@ -414,6 +414,30 @@
           opacity: 0.8;
         }
       }
+
+      .tile.eligible-placement {
+        background-color: rgba(56, 56, 56, 0.1);
+        border: 2px dashed #565656;
+        animation: pulse 1.5s infinite alternate;
+      }
+
+      @keyframes pulse {
+        from {
+          box-shadow: 0 0 5px 0 rgba(56, 56, 56, 0.3);
+        }
+        to {
+          box-shadow: 0 0 10px 5px rgba(56, 56, 56, 0.3);
+        }
+      }
+
+      .tile.invalid-placement {
+        animation: invalidPlacementFlash 0.5s;
+      }
+
+      @keyframes invalidPlacementFlash {
+        0%, 100% { background-color: #ddd; }
+        50% { background-color: rgba(255, 0, 0, 0.3); }
+      }
     </style>
   </head>
 
@@ -520,6 +544,20 @@
               const fromHand = entity.container === playerHandTop || entity.container === playerHandBottom;
               
               if (fromHand) {
+                // Check placement restrictions for cards from hand
+                const isPlayer1 = entity.container === playerHandBottom;
+                const targetRow = isPlayer1 ? gridSize - 1 : 0; // Bottom row for P1, top row for P2
+                const clickedRow = parseInt(tile.dataset.y);
+                
+                // If not placing on the correct row, reject placement
+                if (clickedRow !== targetRow) {
+                  console.warn(`Player ${isPlayer1 ? 1 : 2} can only place cards on ${isPlayer1 ? 'bottom' : 'top'} row`);
+                  // Optional: Show a visual error indication
+                  tile.classList.add('invalid-placement');
+                  setTimeout(() => tile.classList.remove('invalid-placement'), 500);
+                  return;
+                }
+                
                 // Store the original position
                 const oldX = entity.position.x;
                 const oldY = entity.position.y;
@@ -532,6 +570,12 @@
                 } else {
                   playerHand = player1Hand;
                   entity.owner = 1;
+                }
+                
+                // Check if there's already a card in this tile
+                if (tile.querySelector('.card')) {
+                  console.warn("Tile already occupied");
+                  return;
                 }
                 
                 // Remove card from hand array
@@ -566,16 +610,33 @@
                 const dy = Math.abs(entity.position.y - parseInt(tile.dataset.y));
                 const distance = Math.max(dx, dy); // Chebyshev distance allows diagonals
                 
+                // First check if the tile is already occupied
+                if (tile.querySelector('.card')) {
+                  console.warn("Tile already occupied");
+                  // Show invalid placement animation for occupied tiles
+                  tile.classList.add('invalid-placement');
+                  setTimeout(() => tile.classList.remove('invalid-placement'), 500);
+                  return;
+                }
+                
                 if (distance <= entity.movement) {
                   moveEntityTo(entity, parseInt(tile.dataset.x), parseInt(tile.dataset.y));
                 } else {
                   console.warn("Move too far for movement stat.");
-                  // Optionally: flash tile red or show message
+                  // Show invalid placement animation for out-of-range moves
+                  tile.classList.add('invalid-placement');
+                  setTimeout(() => tile.classList.remove('invalid-placement'), 500);
+                  
+                  // Optional: You could also flash the entity's movement range again
+                  highlightEligiblePlacement();
                 }
               }
-  
+
               selectedCard.classList.remove("selected");
               selectedCard = null;
+              
+              // Clear highlighting after placement
+              highlightEligiblePlacement();
             }
           });
 
@@ -687,11 +748,13 @@
           selectedCard.classList.remove("selected");
           if (selectedCard === card) {
             selectedCard = null;
+            highlightEligiblePlacement(); // Clear highlighting
             return;
           }
         }
         selectedCard = card;
         card.classList.add("selected");
+        highlightEligiblePlacement(); // Add highlighting for eligible placements
       });
 
       card.addEventListener("contextmenu", (e) => {
@@ -1180,6 +1243,64 @@
         }
       } catch (error) {
         console.error(`Exception playing ${soundName} sound:`, error);
+      }
+    }
+
+    // This will handle highlighting eligible tiles when a card is selected
+    function highlightEligiblePlacement() {
+      // Clear any existing highlights
+      document.querySelectorAll('.tile.eligible-placement').forEach(tile => {
+        tile.classList.remove('eligible-placement');
+      });
+      
+      // If no card is selected, return
+      if (!selectedCard) return;
+      
+      const entityId = selectedCard.dataset.entityId;
+      const entity = entitiesOnGrid[entityId];
+      
+      if (!entity) return;
+      
+      // If card is from hand, highlight eligible tiles based on player
+      if (entity.container === playerHandTop || entity.container === playerHandBottom) {
+        const isPlayer1 = entity.container === playerHandBottom;
+        const targetRow = isPlayer1 ? gridSize - 1 : 0; // Bottom row or top row
+        
+        // Highlight only the appropriate row
+        for (let x = 0; x < gridSize; x++) {
+          const tileIndex = targetRow * gridSize + x;
+          const tile = grid.children[tileIndex];
+          
+          // Only highlight if tile is empty
+          if (!tile.querySelector('.card')) {
+            tile.classList.add('eligible-placement');
+          }
+        }
+      } else if (entity.container === grid) {
+        // If card is already on grid, highlight tiles within movement range
+        const x = entity.position.x;
+        const y = entity.position.y;
+        const movementRange = entity.movement;
+        
+        // Check each tile on the grid
+        for (let gridY = 0; gridY < gridSize; gridY++) {
+          for (let gridX = 0; gridX < gridSize; gridX++) {
+            // Calculate distance (using Chebyshev distance for diagonal movement)
+            const dx = Math.abs(x - gridX);
+            const dy = Math.abs(y - gridY);
+            const distance = Math.max(dx, dy);
+            
+            if (distance <= movementRange) {
+              const tileIndex = gridY * gridSize + gridX;
+              const tile = grid.children[tileIndex];
+              
+              // Only highlight if tile is empty
+              if (!tile.querySelector('.card')) {
+                tile.classList.add('eligible-placement');
+              }
+            }
+          }
+        }
       }
     }
 
