@@ -898,14 +898,24 @@
     }
 
     function drawFromDeck(playerId, deckId) {
+      console.log(`===== DRAWING CARD for ${playerId} from ${deckId} =====`);
+      
       const deck = decks[deckId];
       if (!deck || deck.length === 0) {
         console.warn("Deck is empty!");
         return;
       }
 
-      // Play card draw sound
-      playSound("draw");
+      // Play card draw sound with explicit debugging
+      console.log("About to play draw sound...");
+      // First try to play it directly
+      sounds.draw.play()
+        .then(() => console.log("Draw sound played successfully via direct call"))
+        .catch(err => {
+          console.error("Direct draw sound failed:", err);
+          // Try the regular method as fallback
+          playSound("draw", 0.8);
+        });
       
       const cardName = deck.shift();
       const ownerId = playerId === "player_1" ? 1 : 2;
@@ -916,7 +926,9 @@
       const x = playerHand.length % 7;
       const y = 0;
       
+      console.log(`Creating entity ${cardName} at position ${x},${y}`);
       createEntity(cardName, x, y, container, ownerId);
+      console.log("Card successfully drawn and added to hand");
     }
 
     async function getPlayerDeck(playerId, jsonFile) {
@@ -946,25 +958,6 @@
         const j = Math.floor(Math.random() * (i + 1));
         [deck[i], deck[j]] = [deck[j], deck[i]];
       }
-    }
-  
-    function drawFromDeck(playerId, deckId) {
-      const deck = decks[deckId];
-      if (!deck || deck.length === 0) {
-        console.warn("Deck is empty!");
-        return;
-      }
-  
-      const cardName = deck.shift();
-      const ownerId = playerId === "player_1" ? 1 : 2;
-      const container = playerId === "player_1" ? playerHandBottom : playerHandTop;
-      
-      // Get next available position
-      const playerHand = playerId === "player_1" ? player1Hand : player2Hand;
-      const x = playerHand.length % 7;
-      const y = 0;
-      
-      createEntity(cardName, x, y, container, ownerId);
     }
   
     function sendToGraveyard(entityId) {
@@ -1101,37 +1094,95 @@
 
     // Preload sounds
     function loadSounds() {
-      // Create audio objects
-      sounds.damage = new Audio("Sounds/damage.mp3");
-      sounds.death = new Audio("Sounds/death.mp3");
-      sounds.draw = new Audio("Sounds/draw.mp3");
+      let soundsLoaded = 0;
+      const expectedSounds = 3; // damage, death, draw
       
-      // Optional: Set volume for all sounds
-      Object.values(sounds).forEach(sound => {
-        if (sound) sound.volume = 0.6;
-      });
+      function checkAllLoaded() {
+        soundsLoaded++;
+        console.log(`Sound loaded: ${soundsLoaded}/${expectedSounds}`);
+        if (soundsLoaded >= expectedSounds) {
+          console.log("✅ All sounds loaded successfully!");
+        }
+      }
+      
+      try {
+        console.log("Starting sound system initialization...");
+        
+        // Create audio objects with load event tracking
+        sounds.damage = new Audio("Sounds/damage.mp3");
+        sounds.damage.addEventListener('canplaythrough', () => {
+          console.log("Damage sound loaded and ready");
+          checkAllLoaded();
+        }, {once: true});
+        
+        sounds.death = new Audio("Sounds/death.mp3");
+        sounds.death.addEventListener('canplaythrough', () => {
+          console.log("Death sound loaded and ready");
+          checkAllLoaded();
+        }, {once: true});
+        
+        sounds.draw = new Audio("Sounds/draw.mp3"); 
+        sounds.draw.addEventListener('canplaythrough', () => {
+          console.log("Draw sound loaded and ready");
+          checkAllLoaded();
+        }, {once: true});
+        
+        // Set volume for all sounds
+        Object.values(sounds).forEach(sound => {
+          if (sound) {
+            sound.volume = 0.6;
+            // Force loading to start
+            sound.load();
+          }
+        });
+        
+        console.log("Sound initialization requested - waiting for loads to complete");
+      } catch (error) {
+        console.error("❌ Error loading sounds:", error);
+      }
     }
 
-    // Play a sound with optional volume override
-    // Function to safely try to play sounds with fallback
     function playSound(soundName, volume = null) {
+      console.log(`Attempting to play sound: ${soundName}`);
+      
       const sound = sounds[soundName];
-      if (!sound) return;
+      if (!sound) {
+        console.error(`Sound '${soundName}' not found`);
+        return;
+      }
       
       // Clone the audio to allow overlapping sounds
       const soundClone = sound.cloneNode();
       if (volume !== null) soundClone.volume = volume;
       
-      // Add error handling
-      const playPromise = soundClone.play();
+      // Set up event listeners for debugging
+      soundClone.onplay = () => console.log(`${soundName} sound started playing`);
+      soundClone.onerror = (e) => console.error(`Error playing ${soundName} sound:`, e);
       
-      if (playPromise !== undefined) {
-        playPromise.catch(error => {
-          console.log("Sound play error:", error);
-          // You could implement a fallback here, like using a different audio API
-        });
+      // Try to play the sound
+      try {
+        const playPromise = soundClone.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => console.log(`${soundName} sound played successfully`))
+            .catch(error => {
+              console.error(`Failed to play ${soundName} sound:`, error);
+              
+              // Additional recovery attempt - sometimes a fresh Audio object works better
+              console.log("Attempting recovery play...");
+              setTimeout(() => {
+                const recoverySound = new Audio(sound.src);
+                recoverySound.volume = volume !== null ? volume : 0.6;
+                recoverySound.play().catch(e => console.error("Recovery attempt failed:", e));
+              }, 100);
+            });
+        }
+      } catch (error) {
+        console.error(`Exception playing ${soundName} sound:`, error);
       }
     }
+
   </script>
 </body>
 </html>
