@@ -8,84 +8,118 @@
   </head>
 
 <body>
-  <div id="game-container">
-    <!-- Left Panel - Player 1 -->
-    <div id="left-panel" class="game-panel">
-      <div class="panel-title">Player 1</div>
-      <div id="player1-hand" class="hand"></div>
-      
-      <div class="player-controls">
-        <button onclick="shuffleDeck('player1_deck')">Shuffle Player 1 Deck</button>
-        <button onclick="drawFromDeck('player1', 'player1_deck')">Draw for Player 1</button>
-      </div>
-      
-      <div class="panel-title">Upgrade Deck - Player 1</div>
-      <div id="player1-upgrade-deck" class="upgrade-deck"></div>
-      
-      <div class="panel-title">Graveyard - Player 1</div>
-      <div id="player1-graveyard" class="graveyard"></div>
+  <!-- Game Start Screen -->
+  <div id="start-screen">
+    <h1>Card Battler</h1>
+    <div class="start-buttons">
+      <button id="startGame" class="main-button">Start New Game</button>
+      <button id="joinGameBtn" class="main-button">Join Game</button>
+      <button id="settingsBtn" class="main-button">Settings</button>
     </div>
     
-    <!-- Center Panel - Game Board -->
-    <div id="center-panel" class="game-panel">
-      <div id="game-board" class="grid"></div>
-    </div>
-    
-    <!-- Right Panel - Player 2 -->
-    <div id="right-panel" class="game-panel">
-      <div class="panel-title">Player 2</div>
-      <div id="player2-hand" class="hand"></div>
-      
-      <div class="player-controls">
-        <button onclick="shuffleDeck('player2_deck')">Shuffle Player 2 Deck</button>
-        <button onclick="drawFromDeck('player2', 'player2_deck')">Draw for Player 2</button>
+    <!-- Join Game Dialog (initially hidden) -->
+    <div id="join-dialog" class="dialog hidden">
+      <h2>Join Existing Game</h2>
+      <input id="sessionInput" placeholder="Enter session ID">
+      <div class="dialog-buttons">
+        <button id="joinGame" class="dialog-button">Join</button>
+        <button id="cancelJoin" class="dialog-button">Cancel</button>
       </div>
-      
-      <div class="panel-title">Upgrade Deck - Player 2</div>
-      <div id="player2-upgrade-deck" class="upgrade-deck"></div>
-      
-      <div class="panel-title">Graveyard - Player 2</div>
-      <div id="player2-graveyard" class="graveyard"></div>
+    </div>
+
+    <!-- Console Messages on Start Screen -->
+    <div id="start-console-container">
+      <div id="startConsoleLog" class="console-log"></div>
     </div>
   </div>
 
-  <div id="damage-controls" style="margin-top: 1rem;">
-    <input type="text" id="damage-target-id" placeholder="Enter entity ID" />
-    <button id="damage-button">Damage +1</button>
-  </div>
-  
-  <div id="attack-menu" style="display: none; position: absolute; z-index: 1000;">
-    <button class="attack-btn" data-type="meele">⚔️</button>
-    <button class="attack-btn" data-type="ranged">🏹</button>
-    <button class="attack-btn" data-type="blast">💥</button>
-  </div>
+  <!-- Main Game Screen (initially hidden) -->
+  <div id="game-screen" class="hidden">
+    <h1>Card Battler Multiplayer</h1>
 
-  <script type="module">
-    // Import the functions you need from the SDKs you need
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
-    // TODO: Add SDKs for Firebase products that you want to use
-    // https://firebase.google.com/docs/web/setup#available-libraries
-  
-    // Your web app's Firebase configuration
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-    const firebaseConfig = {
-      apiKey: "AIzaSyBK7Wq0rZYcGVKDgOQr_cey9KVJzmlIpbM",
-      authDomain: "wh40k-card-battler.firebaseapp.com",
-      databaseURL: "https://wh40k-card-battler-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "wh40k-card-battler",
-      storageBucket: "wh40k-card-battler.firebasestorage.app",
-      messagingSenderId: "761663317397",
-      appId: "1:761663317397:web:1839a33a1fdca94b94c29c",
-      measurementId: "G-6YNWNSD00C"
-    };
-  
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-  </script>
+    <div id="game-container">
+      <!-- Left Panel - Player 1 -->
+      <div id="left-panel" class="game-panel">
+        <div class="panel-title">Player 1</div>
+        <div id="player1-hand" class="hand"></div>
+        
+        <div class="player-controls">
+          <button id="draw-player1">Draw for Player 1</button>
+        </div>
+        
+        <div class="panel-title">Upgrade Deck - Player 1</div>
+        <div id="player1-upgrade-deck" class="upgrade-deck"></div>
+        
+        <div class="panel-title">Graveyard - Player 1</div>
+        <div id="player1-graveyard" class="graveyard"></div>
+      </div>
+      
+      <!-- Center Panel - Game Board -->
+      <div id="center-panel" class="game-panel">
+        <div id="game-board" class="grid"></div>
+      </div>
+      
+      <!-- Right Panel - Player 2 -->
+      <div id="right-panel" class="game-panel">
+        <div class="panel-title">Player 2</div>
+        <div id="player2-hand" class="hand"></div>
+        
+        <div class="player-controls">
+          <button id="draw-player2">Draw for Player 2</button>
+        </div>
+        
+        <div class="panel-title">Upgrade Deck - Player 2</div>
+        <div id="player2-upgrade-deck" class="upgrade-deck"></div>
+        
+        <div class="panel-title">Graveyard - Player 2</div>
+        <div id="player2-graveyard" class="graveyard"></div>
+      </div>
+
+      <div id="game-status" class="status-sidebar">
+        <div id="round-indicator" class="status-box neutral">Round: 1</div>
+        <div id="turn-indicator" class="status-box blue">Player 1's Turn</div>
+        <div id="stage-indicator" class="status-box stage-waitingroom">Stage: waitingroom</div>
+        <button id="advance-button" class="status-box advance-btn">Next Stage ⏭️</button>
+      </div>
+    </div>
+
+    <div id="player-status-panel">
+      <div class="player-status" id="player1-status">
+        <div class="player-label">Player 1</div>
+        <div class="stat">
+          <span class="icon blue">❤️</span>
+          <span id="player1-health">20</span>
+        </div>
+        <div class="stat">
+          <span class="icon blue">🛡️</span>
+          <span id="player1-armor">0</span>
+        </div>
+      </div>
+    
+      <div class="player-status" id="player2-status">
+        <div class="player-label">Player 2</div>
+        <div class="stat">
+          <span class="icon red">❤️</span>
+          <span id="player2-health">20</span>
+        </div>
+        <div class="stat">
+          <span class="icon red">🛡️</span>
+          <span id="player2-armor">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="attack-menu" style="display: none; position: absolute; z-index: 1000;">
+      <button class="attack-btn" data-type="melee">⚔️</button>
+      <button class="attack-btn" data-type="ranged">🏹</button>
+      <button class="attack-btn" data-type="blast">💥</button>
+    </div>
+
+    <p id="playerInfo"></p>
+    <div id="consoleLog" class="console-log"></div>
+  </div>
 
   <script src="app.js"></script>
-
+  
 </body>
 </html>

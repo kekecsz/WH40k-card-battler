@@ -1,9 +1,170 @@
-body {
-    font-family: sans-serif;
-    background: #f0f0f0;
+  /* Base styles for the entire application */
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #1e1e2e;
+    color: #cdd6f4;
     margin: 0;
-    padding: 20px;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
   }
+
+  /* Hidden class for toggling visibility */
+  .hidden {
+    display: none !important;
+  }
+
+  /* ===== START SCREEN STYLES ===== */
+  #start-screen {
+    text-align: center;
+    padding: 20px;
+    background-color: #313244;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    max-width: 800px;
+    width: 100%;
+  }
+
+  #start-screen h1 {
+    font-size: 3rem;
+    margin-bottom: 40px;
+    color: #89b4fa;
+    text-shadow: 0 0 10px rgba(137, 180, 250, 0.5);
+  }
+
+  #game-screen {
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+  }
+
+  .start-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+
+  .main-button {
+    background-color: #89b4fa;
+    color: #1e1e2e;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .main-button:hover {
+    background-color: #b4befe;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(137, 180, 250, 0.4);
+  }
+
+  /* Dialog styles */
+  .dialog {
+    background-color: #45475a;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px auto;
+    max-width: 400px;
+  }
+
+  .dialog h2 {
+    color: #89b4fa;
+    margin-top: 0;
+  }
+
+  .dialog input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #6c7086;
+    background-color: #313244;
+    color: #cdd6f4;
+    font-size: 1rem;
+  }
+
+  .dialog-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+
+  .dialog-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .dialog-button:first-child {
+    background-color: #89b4fa;
+    color: #1e1e2e;
+  }
+
+  .dialog-button:last-child {
+    background-color: #585b70;
+    color: #cdd6f4;
+  }
+
+  .dialog-button:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+  }
+
+  /* Console styles for start screen */
+  #start-console-container {
+    margin-top: 30px;
+    text-align: left;
+  }
+
+  #startConsoleLog {
+    background-color: #1e1e2e;
+    border-radius: 5px;
+    padding: 15px;
+    height: 150px;
+    overflow-y: auto;
+    font-family: monospace;
+    border: 1px solid #45475a;
+  }
+
+  #startConsoleLog div {
+    margin-bottom: 5px;
+    line-height: 1.4;
+  }
+
+  .error-message {
+    color: #f38ba8;
+  }
+
+  /* Ensure proper scrolling for consoles */
+  .console-log {
+    max-height: 200px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #45475a #1e1e2e;
+  }
+
+  .console-log::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .console-log::-webkit-scrollbar-track {
+    background: #1e1e2e;
+  }
+
+  .console-log::-webkit-scrollbar-thumb {
+    background-color: #45475a;
+    border-radius: 4px;
+  }
+
 
   /* Main container with horizontal layout */
   #game-container {
@@ -64,55 +225,11 @@ body {
   .upgrade-deck {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    grid-template-rows: repeat(3, 80px);
     gap: 3px;
     margin-top: 10px;
     background-color: #f5f5f5;
     padding: 5px;
     border-radius: 5px;
-  }
-
-  .card-info {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    color: white;
-    font-size: 12px;
-    text-align: center;
-    padding: 2px 0;
-    border-bottom-left-radius: 6px;
-    border-bottom-right-radius: 6px;
-    pointer-events: none;
-  }
-
-  .card img.card-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 6px;
-    pointer-events: none;
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(5, 110px);
-    gap: 3px;
-    width: 100%;
-  }
-
-  .tile {
-    background-color: #ddd;
-    border: 2px solid #aaa;
-    position: relative;
-    cursor: pointer;
-    aspect-ratio: 3/4;
-  }
-
-  .tile.selected {
-    border: 2px solid #ff9800;
   }
 
   .card {
@@ -135,12 +252,83 @@ body {
     position: relative;
   }
 
-  .hand > .card {
-    grid-column: auto;
+  .card img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 6px;
+    pointer-events: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  }
+
+  .sick-overlay {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: 24px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    padding: 2px 5px;
+    pointer-events: none;
+  }
+
+  .card-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    font-size: 12px;
+    text-align: center;
+    padding: 2px 0;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    pointer-events: none;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 3px;
+    width: 100%;
+    height: auto;
+  }
+
+  .tile {
+    background-color: #ddd;
+    border: 2px solid #aaa;
+    position: relative;
+    cursor: pointer;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: 3px; 
   }
 
   .card.selected {
     outline: 3px solid #ff9800;
+  }
+  
+  .tile.selected {
+    border: 2px solid #ff9800;
+  }
+
+  .card.selectabletomove {
+    outline: 3px solid #4caf50;
+  }
+
+  .card.selectabletoattack {
+    outline: 3px solid #f3d739;
+  }
+
+  .card:hover {
+    transform: scale(1.05);
+  }
+
+  .hand > .card {
+    grid-column: auto;
   }
 
   .hand {
@@ -234,6 +422,10 @@ body {
     background-color: lightgray;
     border-radius: 4px;
   }
+  
+  .card-on-board.selected {
+    outline: 3px solid blue;
+  }
 
   .damage-overlay {
     position: absolute;
@@ -290,59 +482,186 @@ body {
     }
   }
 
-  /* Graveyard Styles */
-  .graveyard {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    padding: 10px;
-    background-color: #444;
-    border-radius: 5px;
-    min-height: 60px;
-    margin-top: 5px;
+  .damage-number {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ff0000;
+    font-size: 2rem;
+    font-weight: bold;
+    text-shadow: 2px 2px 0 #000;
+    animation: damageNumberAnim 1s ease-out forwards;
+    z-index: 10;
+    pointer-events: none;
   }
 
-  .graveyard-item {
-    width: 40px;
-    height: 60px;
-    background-color: #666;
-    border-radius: 4px;
+  @keyframes damageNumberAnim {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.5);
+    }
+    10% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.2);
+    }
+    20% {
+      transform: translate(-50%, -50%) scale(1);
+    }
+    80% {
+      opacity: 1;
+      transform: translate(-50%, -60%) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(-50%, -100%) scale(0.8);
+    }
+  }
+
+  /* CSS for Graveyard Display */
+  #player1-graveyard, #player2-graveyard {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
+    min-height: 100px;
+    background-color: rgba(30, 30, 30, 0.7);
+    border-radius: 5px;
+    padding: 10px;
+    margin: 5px;
     position: relative;
-    overflow: hidden;
+    overflow: visible; /* Allow cards to overflow for hover effects */
   }
 
-  .graveyard-item img {
+  .graveyard-card {
+    width: 60px;
+    height: 90px;
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+  }
+
+  .graveyard-card img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   }
 
-  .graveyard-item::after {
-    content: "";
+  .graveyard-card:hover {
+    transform: scale(1.5) translateY(-10px);
+    z-index: 100 !important;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  }
+
+  .card-count-badge {
     position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #e74c3c;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+  }
+
+  .empty-graveyard {
+    color: #aaa;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 90px;
+  }
+
+  /* Styles for the graveyard modal (future implementation) */
+  .graveyard-modal {
+    display: flex;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 1;
-  }
-
-  .graveyard-info {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
     background-color: rgba(0, 0, 0, 0.7);
-    color: white;
-    font-size: 8px;
-    text-align: center;
-    z-index: 2;
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
   }
 
+  .graveyard-modal .modal-content {
+    background-color: #242424;
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 80%;
+    max-height: 80vh;
+    overflow-y: auto;
+    color: #fff;
+    position: relative;
+  }
+
+  .graveyard-modal .close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #aaa;
+  }
+
+  .graveyard-modal .cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+  }
+
+  .graveyard-modal .graveyard-card-detail {
+    width: 120px;
+    position: relative;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 5px;
+    transition: border-color 0.2s;
+  }
+
+  .graveyard-modal .graveyard-card-detail:hover {
+    border-color: #5f9ea0;
+  }
+
+  .graveyard-modal .graveyard-card-detail img {
+    width: 100%;
+    border-radius: 5px;
+  }
+
+  .graveyard-modal .card-stats {
+    font-size: 11px;
+    margin-top: 5px;
+  }
+
+  .graveyard-modal .resurrect-button {
+    background-color: #2c7873;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    margin-top: 15px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .graveyard-modal .resurrect-button:hover {
+    background-color: #1f5f5b;
+  }
+
+  /* Death animation styles */
   .death-animation {
     animation: deathAnimation 2s forwards; /* Increased to 2s */
     position: relative;
@@ -430,4 +749,148 @@ body {
   @keyframes invalidPlacementFlash {
     0%, 100% { background-color: #ddd; }
     50% { background-color: rgba(255, 0, 0, 0.3); }
+  }
+
+  .status-sidebar {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-family: sans-serif;
+  }
+  
+  .status-box {
+    width: 180px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Round is neutral gray */
+  .status-box.neutral {
+    background-color: #666;
+  }
+  
+  /* Player turn colors */
+  .status-box.blue {
+    background-color: #4a90e2;
+  }
+  
+  .status-box.red {
+    background-color: #e94e4e;
+  }
+  
+  /* Stage backgrounds */
+  .stage-predraw     { background-color: #555; }
+  .stage-draw        { background-color: #3498db; }
+  .stage-cardplacement { background-color: #f39c12; }
+  .stage-upgrade     { background-color: #9b59b6; }
+  .stage-movement    { background-color: #1abc9c; }
+  .stage-prebattle   { background-color: #2ecc71; }
+  .stage-battle_m    { background-color: #c0392b; }
+  .stage-battle_r    { background-color: #c0392b; }
+  .stage-battle_b    { background-color: #c0392b; }
+  .stage-turnend     { background-color: #7f8c8d; }
+  .stage-waitingroom { background-color: #95a5a6; }
+
+  .advance-btn {
+    background-color: #27ae60;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .advance-btn:hover {
+    background-color: #2ecc71;
+  }
+  
+  .advance-btn.disabled {
+    background-color: #bbb;
+    cursor: not-allowed;
+  }
+  
+  #player-status-panel {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 12px;
+    background-color: #f9f9f9;
+    max-width: 300px;
+    font-family: sans-serif;
+  }
+  
+  .player-status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .player-label {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .stat {
+    display: flex;
+    align-items: center;
+    margin: 2px;
+  }
+  
+  .icon {
+    font-size: 20px;
+    margin-right: 4px;
+  }
+  
+  .icon.blue {
+    color: #2196F3;
+  }
+  
+  .icon.red {
+    color: #F44336;
+  }
+
+  #game-over-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 5rem;
+    font-weight: bold;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+  }
+
+  #game-over-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  #game-over-overlay.victory {
+    color: gold;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+  }
+
+  #game-over-overlay.defeat {
+    color: crimson;
+    text-shadow: 0 0 10px rgba(220, 20, 60, 0.7);
+  }
+
+  #game-over-overlay.draw {
+    color: white;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
   }
